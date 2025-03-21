@@ -1,0 +1,77 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+    },
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "DJANGO_SETTINGS_MODULE": "globe.settings",
+    },
+    "files.associations": {
+        "*.py": "python",
+        "**/templates/*.html": "django-html",
+    },
+    "emmet.includeLanguages": {
+        "django-html": "html",
+        "django-txt": "html"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "[django-html]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "djlint.ignore": [
+        "H014"
+    ],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.gitignore": false // Or remove specific paths that you want to include
+    },
+    "emmet.showAbbreviationSuggestions": true,
+    "emmet.triggerExpansionOnTab": true,
+    "emmet.useInlineCompletions": true,
+    "emmet.showSuggestionsAsSnippets": true,
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportAttributeAccessIssue": "none",
+        "reportArgumentType": "none",
+        "reportAssignmentType": "none",
+        "reportOperatorIssue": "none",
+        "reportOptionalMemberAccess": "none",
+        "reportOptionalCall": "none",
+    },
+    "djlint.enableLinting": true,
+    "djlint.closeVoidTags": true,
+    "djlint.formatAttributeTemplateTags": true,
+    "editor.wrappingStrategy": "advanced",
+    "html.format.wrapAttributes": "force",
+    "djlint.maxLineLength": 1,
+    "djlint.maxAttributeLength": 30,
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.showBreakpointsInOverviewRuler": false,
+    "debug.focusWindowOnBreak": true,
+    "editor.quickSuggestions": {
+        "other": "on",
+        "comments": "off",
+        "strings": "off"
+    },
+    "workbench.editor.revealIfOpen": true,
+    "djlint.showInstallError": false,
+    "workbench.colorTheme": "Monokai",
+    "search.exclude": {
+        "**/.venv": false // Ensure this is set to false or remove it
+    },
+    "html.format.enable": true,
+    "angular-template-formatter.closeTagSameLine": false,
+    "angular-template-formatter.useSpaces": false,
+    "extensions.ignoreRecommendations": true,
+    "editor.linkedEditing": true,
+}

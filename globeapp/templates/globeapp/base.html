@@ -1,0 +1,66 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static 'images/TTI_logo.svg' %}" />
+        <title>
+            {% block page_title %}
+                Globe
+            {% endblock %}
+        -  Techtronic Industries TTI</title>
+        <link rel="stylesheet"
+              href="https://use.typekit.net/xmo4jxo.css" />
+        {% if tti_is_dist_assets %}
+            <link rel="stylesheet"
+                  href="{% static 'dist/assets/style.css' %}{{static_asset_query_param}}" />
+        {% endif %}
+    </head>
+    <body class="globe">
+        <header class="tti-header">
+            Site Header
+        </header>
+        <main>
+            {% block messages %}
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="message-item message-item--{{ message.tags }}">
+                                <div class="message-item-inner">
+                                    <li {% if message.tags %}
+                                            class="{{ message.tags }}"
+                                        {% endif %}>
+                                        {{ message }}
+                                    </li>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endblock %}
+            <div class="content-wrapper">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </main>
+        <footer>
+        </footer>
+   
+        {% block extra_body %}
+        
+        {% endblock extra_body %}
+        {% if tti_is_dist_assets %}
+            <script type="module"
+                    src="{% static 'dist/assets/main.js' %}{{static_asset_query_param}}"></script>
+        {% else %}
+            <script type="module"
+                    src="http://localhost:5173/@vite/client"></script>
+            <script type="module"
+                    src="http://localhost:5173/src/main.js"></script>
+        {% endif %}
+    </body>
+</html>
