@@ -3,22 +3,34 @@
 
 
 {% block content %}
-<h1>
- All locations            <img width="50" height="50" src='{% static "assets/abstract_pattern.jpg"%}' />
+<div class="page">
+  
+  <div class="map-wrapper">
+    <div id="map">
+    </div>
+  </div>
+  <div>
+    <h1>
+      All locations            
+      <img width="50" height="50" src='{% static "assets/abstract_pattern.jpg"%}' />
+     
+       <ul>
+         {% for location in locations%}
+           <li class="location">
+             {{ location.name }}
+           </li>
+         {% endfor %}
+       </ul>
+       All Posts
+       <ul>
+     
+         {% for sm_post in sm_posts %}
+           <li class="post">
+            Title: {{ sm_post.title }}, by {{ sm_post.post_author }}, brand: {{ sm_post.brand.title }}, Location {{ sm_post.location.name }} <br>
+           </li>
+         {% endfor %}
+     </h1>
+  </div>
 
-  <ul>
-    {% for location in locations%}
-      <li class="location">
-        {{ location.name }}
-      </li>
-    {% endfor %}
-  </ul>
-  All Posts
-  <ul>
-    {% for sm_post in sm_posts %}
-      <li class="post">
-       Title: {{ sm_post.title }}, by {{ sm_post.post_author }}, brand: {{ sm_post.brand.title }}, Location {{ sm_post.location.name }} <br>
-      </li>
-    {% endfor %}
-</h1>
-{% endblock content %}
+   {% endblock content %}
+</div>

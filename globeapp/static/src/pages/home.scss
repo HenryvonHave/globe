@@ -1,8 +1,14 @@
 body {
-  background-color: wheat;
+//   background-color: wheat;
 }
 
-.Pcation {
-    background-color: green;
+.page {
+    display: flex;
 }
+.map-wrapper {
+    position: relative;
+    width: 600px;
+    height: 600px;
+}
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
