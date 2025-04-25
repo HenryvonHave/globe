@@ -1,36 +1,229 @@
+cat << 'EOF' > globeapp/templates/globeapp/home.html
 {% extends './base.html' %}
 {% load i18n static %}
 
-
 {% block content %}
+<style>
+    body.globe {
+        background-image: url('{% static "assets/abstract_pattern.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .tti-header {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        text-align: left;
+        position: relative;
+        z-index: 10;
+    }
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .page {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .map-wrapper {
+        width: 600px;
+        height: 600px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        position: relative;
+    }
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    .content-panel {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: #333;
+        max-width: 400px;
+    }
+    h1 {
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+        margin: 0 0 15px;
+        color: #333;
+    }
+    .filter-wrapper {
+        margin-bottom: 15px;
+    }
+    select {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #fff;
+        cursor: pointer;
+    }
+    select:focus {
+        outline: none;
+        border-color: #007cbf;
+    }
+</style>
 <div class="page">
-  
-  <div class="map-wrapper">
-    <div id="map">
+    <div class="map-wrapper">
+        <div id="map"></div>
     </div>
-  </div>
-  <div>
-    <h1>
-      All locations            
-      <img width="50" height="50" src='{% static "assets/abstract_pattern.jpg"%}' />
-     
-       <ul>
-         {% for location in locations%}
-           <li class="location">
-             {{ location.name }}
-           </li>
-         {% endfor %}
-       </ul>
-       All Posts
-       <ul>
-     
-         {% for sm_post in sm_posts %}
-           <li class="post">
-            Title: {{ sm_post.title }}, by {{ sm_post.post_author }}, brand: {{ sm_post.brand.title }}, Location {{ sm_post.location.name }} <br>
-           </li>
-         {% endfor %}
-     </h1>
-  </div>
+    <div class="content-panel">
+        <h1>Social Media Posts Globe</h1>
+        <div class="filter-wrapper">
+            <label for="continent-filter">Filter by continent:</label>
+            <select id="continent-filter">
+                <option value="">All Locations</option>
+                <option value="Africa">Africa</option>
+                <option value="Asia">Asia</option>
+                <option value="Europe">Europe</option>
+                <option value="North America">North America</option>
+                <option value="South America">South America</option>
+                <option value="Oceania">Oceania</option>
+                <option value="Antarctica">Antarctica</option>
+            </select>
+        </div>
+    </div>
+    <script>
+        map.on('load', async () => {
+            try {
+                const response = await fetch('/api/posts/', {
+                    headers: { 'Authorization': 'Token 3fefdf099f45c3984b532c8b1a6c2f473b3fa9ad' }
+                });
+                if (!response.ok) {
+                    console.error('API fetch failed:', response.status, response.statusText);
+                    return;
+                }
+                const posts = await response.json();
+                console.log('Fetched posts:', posts);
 
-   {% endblock content %}
+                const validPosts = posts.filter(post => 
+                    post.latitude != null && post.longitude != null
+                );
+                console.log('Valid posts with coordinates:', validPosts);
+
+                const continentFilter = document.getElementById('continent-filter');
+                continentFilter.addEventListener('change', async () => {
+                    const continent = continentFilter.value;
+                    const response = await fetch('/api/posts/', {
+                        headers: { 'Authorization': 'Token 3fefdf099f45c3984b532c8b1a6c2f473b3fa9ad' }
+                    });
+                    if (!response.ok) {
+                        console.error('API fetch failed on filter:', response.status);
+                        return;
+                    }
+                    let posts = await response.json();
+                    console.log('Filtered posts:', posts);
+
+                    const continentBounds = {
+                        'Africa': { lat: [-35, 37], lon: [-18, 52] },
+                        'Asia': { lat: [-10, 60], lon: [25, 180] },
+                        'Europe': { lat: [35, 70], lon: [-25, 40] },
+                        'North America': { lat: [15, 70], lon: [-170, -50] },
+                        'South America': { lat: [-55, 15], lon: [-80, -35] },
+                        'Oceania': { lat: [-50, -10], lon: [110, 180] },
+                        'Antarctica': { lat: [-90, -60], lon: [-180, 180] }
+                    };
+                    if (continent) {
+                        const bounds = continentBounds[continent];
+                        posts = posts.filter(post =>
+                            post.latitude >= bounds.lat[0] &&
+                            post.latitude <= bounds.lat[1] &&
+                            post.longitude >= bounds.lon[0] &&
+                            post.longitude <= bounds.lon[1]
+                        );
+                        console.log(`Posts filtered for ${continent}:`, posts);
+                    }
+                    updateMap(posts);
+                });
+
+                function updateMap(posts) {
+                    const geojson = {
+                        type: 'FeatureCollection',
+                        features: posts.map(post => ({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [post.longitude, post.latitude]
+                            },
+                            properties: {
+                                title: post.title || 'Untitled',
+                                body: post.body || '',
+                                brand: post.brand || 'None',
+                                platform: post.platform || 'None',
+                                author: post.post_author || 'Unknown'
+                            }
+                        }))
+                    };
+                    console.log('GeoJSON for map:', geojson);
+
+                    if (!map.getSource('posts')) {
+                        map.addSource('posts', {
+                            type: 'geojson',
+                            data: geojson
+                        });
+                        map.addLayer({
+                            id: 'posts-layer',
+                            type: 'circle',
+                            source: 'posts',
+                            paint: {
+                                'circle-radius': 8,
+                                'circle-color': '#007cbf',
+                                'circle-opacity': 0.8
+                            }
+                        });
+                    } else {
+                        map.getSource('posts').setData(geojson);
+                    }
+                }
+
+                map.on('click', 'posts-layer', (e) => {
+                    const props = e.features[0].properties;
+                    new mapboxgl.Popup()
+                        .setLngLat(e.features[0].geometry.coordinates)
+                        .setHTML(
+                            `<h3>${props.title}</h3>` +
+                            `<p>${props.body}</p>` +
+                            `<p>Brand: ${props.brand}</p>` +
+                            `<p>Platform: ${props.platform}</p>` +
+                            `<p>Author: ${props.author}</p>`
+                        )
+                        .addTo(map);
+                });
+
+                map.on('mouseenter', 'posts-layer', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('mouseleave', 'posts-layer', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+
+                updateMap(validPosts);
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            }
+        });
+    </script>
 </div>
+{% endblock content %}
+EOF
